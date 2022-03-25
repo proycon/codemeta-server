@@ -155,6 +155,7 @@ class CodemetaServer(FastAPI):
             "graph": True,
             "output": output_type,
             "toolstore": True,
+            "no_cache": True,
             "css": [ os.path.join(self.baseurl,"static/codemeta.css") , os.path.join(self.baseurl,"static/fontawesome.css") ]
         })
 
