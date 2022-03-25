@@ -80,7 +80,43 @@ class CodemetaServer(FastAPI):
                                   serialize(self.graph, None, self.get_args(output_type), contextgraph=self.contextgraph )
                                )
 
-        @self.get("/{resource: path}",
+        @self.get("/data.json",
+                  name="Full data download (JSON-LD)",
+                  description="Returns all data as JSON-LD",
+                  responses= {
+                      200: {
+                          "description": "Full dump of the knowledge graph",
+                          "content": {
+                              "application/json+ld": {},
+                              "application/json": {},
+                          }
+                      },
+                  }
+                )
+        async def data_json():
+            return self.respond( "json",
+                                  serialize(self.graph, None, self.get_args("json"), contextgraph=self.contextgraph )
+                               )
+
+        @self.get("/data.ttl",
+                  name="Full data download (Turtle)",
+                  description="Returns all data as Turtle",
+                  responses= {
+                      200: {
+                          "description": "Full dump of the knowledge graph",
+                          "content": {
+                              "text/turtle": {},
+                          }
+                      },
+                  }
+                )
+        async def data_turtle():
+            return self.respond( "turtle",
+                                  serialize(self.graph, None, self.get_args("turtle"), contextgraph=self.contextgraph )
+                               )
+
+
+        @self.get("/{resource:path}",
                   name="Resource",
                   description="Returns the selected resource",
                   responses= {
@@ -96,10 +132,17 @@ class CodemetaServer(FastAPI):
                   }
                  )
         async def get_resource(resource: str, request: Request):
-            output_type = self.get_output_type(request)
+            if resource.endswith(".json"):
+                resource = resource[:-5]
+                output_type = "json"
+            elif resource.endswith(".ttl"):
+                resource = resource[:-4]
+                output_type = "turtle"
+            else:
+                output_type = self.get_output_type(request)
             res = URIRef(os.path.join(self.baseuri, resource))
             if (res,None,None) in self.graph:
-                self.respond( output_type,
+                return self.respond( output_type,
                              serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph )
                             )
             else:
