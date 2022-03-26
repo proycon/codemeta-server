@@ -37,7 +37,7 @@ class CodemetaServer(FastAPI):
         print(f"Instantiating codemeta server: graph={graph}, baseuri={self.baseuri}, baseurl={self.baseurl}",file=sys.stderr)
 
         g, contextgraph = init_graph()
-        parse_jsonld(g, None, getstream(graph), args)
+        parse_jsonld(g, None, getstream(graph), self.get_args())
         self.graph = g
         self.contextgraph = contextgraph
         # Instantiate FastAPI
@@ -149,7 +149,7 @@ class CodemetaServer(FastAPI):
                 return self.respond404(output_type)
 
 
-    def get_args(self, output_type: str) -> AttribDict:
+    def get_args(self, output_type: str = "json") -> AttribDict:
         return AttribDict({
             "baseuri": self.baseuri,
             "graph": True,
