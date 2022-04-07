@@ -1,6 +1,7 @@
 import sys
 import os.path
-from typing import Union
+import json
+from typing import Union, Optional
 from os import environ
 from rdflib_endpoint import SparqlEndpoint
 from rdflib import Graph, ConjunctiveGraph, URIRef
@@ -16,6 +17,17 @@ import argparse
 VERSION = "0.1"
 
 STATIC_DIR = os.path.join(CODEMETAPATH[0], "resources")
+
+
+SPARQL_BINDS = """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX codemeta: <https://codemeta.github.io/terms/>
+PREFIX stype: <https://w3id.org/software-types#>
+PREFIX repostatus: <https://www.repostatus.org/#>
+PREFIX spdx: <http://spdx.org/licences/>
+PREFIX orcid: <http://orcid.org/>
+"""
 
 class CodemetaServer(FastAPI):
     def __init__(self, *args,
@@ -74,11 +86,18 @@ class CodemetaServer(FastAPI):
                       },
                   }
                 )
-        async def index(request: Request):
+        async def index(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
             output_type = self.get_output_type(request)
-            return self.respond( output_type,
-                                  serialize(self.graph, None, self.get_args(output_type), contextgraph=self.contextgraph )
-                               )
+            if q:
+                sparql = self.formulate_query(q)
+            if res: res = [ URIRef(self.baseuri + x) for x in res.split(";") ]
+            try:
+                response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql )
+            except Exception as e:
+                msg = str(e)
+                if sparql: msg += " - SPARQL query was: f{sparql}"
+                return self.respond400( output_type, msg)
+            return self.respond( output_type, response)
 
         @self.get("/data.json",
                   name="Full data download (JSON-LD)",
@@ -176,6 +195,14 @@ class CodemetaServer(FastAPI):
         elif output_type == "html":
             return Response(status_code=404, content="<html><body><strong>404</strong> - Not Found - Resource does not exist</body></html>", media_type="text/html")
 
+    def respond400(self, output_type: str, message: str) -> Response:
+        if output_type == 'json':
+            return Response(status_code=400, content=json.dumps({"message": message}), media_type="application/json")
+        elif output_type == "turtle":
+            return Response(status_code=400, content="", media_type="text/turtle")
+        elif output_type == "html":
+            return Response(status_code=400, content=f"<html><body><strong>400</strong> - Bad Request - {message}</body></html>", media_type="text/html")
+
     def get_output_type(self, request: Request) -> str:
         """Get the outputtype based on content negotiation"""
         accept = request.headers.get('Accept')
@@ -207,6 +234,43 @@ class CodemetaServer(FastAPI):
                     #For a bunch of RDF types which we don't support, we just return turtle instead
                     return "turtle"
         return "html"
+
+    def formulate_query(self, q: str, restype="schema:SoftwareSourceCode"):
+        """Translate a query from a simpler less-formalised syntax to SPARQL"""
+        conditions = []
+        for clause in q.split(';'): #semicolon splits queries (conjunctive)
+            if clause.find('=') > 0:
+                key, value = clause.split('=',1)
+                value = value.strip()
+                if value and value[0] == '=': #== operator for exact match
+                    value = value[1:]
+                    exact = True
+                else:
+                    exact = False
+                if not (value.startswith('rdf:') or value.startswith('rdfs:') or value.startswith('schema:') or value.startswith('codemeta:') or value.startswith('stype:') or value.isnumeric()):
+                    value = f"\"{value}\"" #string literal
+                i = len(conditions) + 1
+                if exact:
+                    conditions.append(f"?res {key} {value} .")
+                else:
+                    conditions.append(f"?res {key} ?v{i} FILTER regex(str(?v{i}), {value}, \"i\") .") #last i is for case-insensitive
+            else:
+                value = clause.strip()
+                i = len(conditions) + 1
+                #broad search on names, descriptions and keywords
+                conditions.append(f"{{ ?res schema:name ?v{i}a FILTER regex(str(?v{i}a), \"{value}\", \"i\") . }} UNION {{ ?res schema:description ?v{i}b FILTER regex(str(?v{i}b), \"{value}\", \"i\") . }} UNION {{ ?res schema:keywords ?v{i}c FILTER regex(str(?v{i}c), \"{value}\", \"i\") . }}")
+
+        conditions = "\n".join(conditions)
+
+        return f"""
+        {SPARQL_BINDS}
+        SELECT DISTINCT ?res
+        WHERE {{
+            ?res rdf:type {restype} .
+            {conditions}
+        }}
+        """
+
 
 def get_app(**kwargs):
     if not kwargs.get('graph'):
