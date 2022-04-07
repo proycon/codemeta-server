@@ -1,6 +1,7 @@
 import sys
 import os.path
 import json
+import traceback
 from typing import Union, Optional
 from os import environ
 from rdflib_endpoint import SparqlEndpoint
@@ -46,6 +47,8 @@ class CodemetaServer(FastAPI):
         else:
             self.baseuri = self.baseurl
 
+        self.title = kwargs.get('title')
+
         print(f"Instantiating codemeta server: graph={graph}, baseuri={self.baseuri}, baseurl={self.baseurl}",file=sys.stderr)
 
         g, contextgraph = init_graph()
@@ -87,17 +90,25 @@ class CodemetaServer(FastAPI):
                   }
                 )
         async def index(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
-            output_type = self.get_output_type(request)
-            if q:
-                sparql = self.formulate_query(q)
-            if res: res = [ URIRef(self.baseuri + x) for x in res.split(";") ]
-            try:
-                response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql )
-            except Exception as e:
-                msg = str(e)
-                if sparql: msg += " - SPARQL query was: f{sparql}"
-                return self.respond400( output_type, msg)
-            return self.respond( output_type, response)
+            return self.get_index(request,res,q,sparql, "cardindex.html", )
+
+        @self.get("/table/",
+                  name="Index",
+                  description="Provides a tabular index to the data or simply returns all the data, i.e. the entire knowledge graph, depending on the content negotiation.",
+                  responses= {
+                      200: {
+                          "description": "Index to the data or full dump of the knowledge graph",
+                          "content": {
+                              "text/html": {},
+                              "application/json+ld": {},
+                              "application/json": {},
+                              "text/turtle": {},
+                          }
+                      },
+                  }
+                )
+        async def table(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
+            return self.get_index(request,res,q,sparql, "index.html")
 
         @self.get("/data.json",
                   name="Full data download (JSON-LD)",
@@ -167,6 +178,21 @@ class CodemetaServer(FastAPI):
             else:
                 return self.respond404(output_type)
 
+    def get_index(self, request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None, indextemplate: str  = "cardindex.html"):
+        output_type = self.get_output_type(request)
+        if q:
+            sparql = self.formulate_query(q)
+        if res: res = [ URIRef(self.baseuri + x) for x in res.split(";") ]
+        try:
+            response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql, indextemplate=indextemplate, title=self.title)
+        except Exception as e:
+            msg = str(e)
+            if sparql: msg += "<pre>SPARQL query was: f{sparql}\n</pre>"
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            msg += "<pre>" + "\n".join(traceback.format_exception(exc_type, exc_value, exc_traceback)) + "</pre>"
+            print(msg,file=sys.stderr)
+            return self.respond400( output_type, msg)
+        return self.respond( output_type, response)
 
     def get_args(self, output_type: str = "json") -> AttribDict:
         return AttribDict({
@@ -301,6 +327,7 @@ def main():
     parser.add_argument('--graph',type=str, help="JSON-LD graph to load (as produced by codemetapy --graph)", action='store', required=True)
     parser.add_argument('--baseuri',type=str, help="Base URI used in the IDs of all resources", action='store', required=True)
     parser.add_argument('--baseurl',type=str, help="Base URL (only needed when distinct from base URI)", action='store')
+    parser.add_argument('--title',type=str, help="Title", action='store')
     args = parser.parse_args() #parsed arguments can be accessed as attributes
 
     # Start the SPARQL endpoint based on the RDFLib Graph
