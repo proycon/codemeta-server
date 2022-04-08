@@ -173,7 +173,7 @@ class CodemetaServer(FastAPI):
             res = URIRef(os.path.join(self.baseuri, resource))
             if (res,None,None) in self.graph:
                 return self.respond( output_type,
-                             serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph )
+                             serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title )
                             )
             else:
                 return self.respond404(output_type)
@@ -314,11 +314,7 @@ def get_app(**kwargs):
     if not kwargs.get('baseurl'):
         kwargs['baseurl'] = kwargs['baseuri']
 
-    return CodemetaServer(
-        graph=kwargs['graph'],
-        baseuri=kwargs['baseuri'],
-        baseurl=kwargs['baseurl'],
-    )
+    return CodemetaServer(**kwargs)
 
 def main():
     import uvicorn
