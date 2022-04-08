@@ -184,7 +184,7 @@ class CodemetaServer(FastAPI):
             sparql = self.formulate_query(q)
         if res: res = [ URIRef(self.baseuri + x) for x in res.split(";") ]
         try:
-            response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql, indextemplate=indextemplate, title=self.title)
+            response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql, indextemplate=indextemplate, title=self.title, q=q if q else "")
         except Exception as e:
             msg = str(e)
             if sparql: msg += "<pre>SPARQL query was: f{sparql}\n</pre>"
@@ -197,6 +197,7 @@ class CodemetaServer(FastAPI):
     def get_args(self, output_type: str = "json") -> AttribDict:
         return AttribDict({
             "baseuri": self.baseuri,
+            "baseurl": self.baseurl,
             "graph": True,
             "output": output_type,
             "toolstore": True,
