@@ -310,6 +310,9 @@ def get_app(**kwargs):
             kwargs['baseuri'] = environ['CODEMETA_BASEURI']
         else:
             raise Exception("No base URI provided, use --baseuri or set environment variable $CODEMETA_BASEURI")
+    if not kwargs.get('title'):
+        if 'CODEMETA_TITLE' in environ:
+            kwargs['title'] = environ['CODEMETA_TITLE']
 
     if not kwargs.get('baseurl'):
         kwargs['baseurl'] = kwargs['baseuri']
