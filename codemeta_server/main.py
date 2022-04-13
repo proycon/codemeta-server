@@ -6,7 +6,7 @@ import glob
 from typing import Union, Optional
 from os import environ
 from rdflib_endpoint import SparqlEndpoint
-from rdflib import Graph, ConjunctiveGraph, URIRef
+from rdflib import Graph, ConjunctiveGraph, URIRef, Literal
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -314,8 +314,8 @@ class CodemetaServer(FastAPI):
                     for line in logdata:
                         if line.lower().find("harvester error") != -1:
                             errors += 1
-                    self.graph.set((res, CODEMETAPY.errors, errors))
-                    self.graph.set((res, CODEMETAPY.log, "\n".join(logdata)))
+                    self.graph.set((res, CODEMETAPY.errors, Literal(errors)))
+                    self.graph.set((res, CODEMETAPY.log, Literal("\n".join(logdata))))
             else:
                 print(f"Log {logfile} describes non-existing resource {res}",file=sys.stderr)
 
