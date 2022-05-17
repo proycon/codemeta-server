@@ -20,7 +20,7 @@ Features:
 * Advanced query facilities using SPARQL:
     * SPARQL endpoint
     * [YASGUI](https://github.com/TriplyDB/YASGUI) front-end for end-users.
-* JSON-LD and turtle serialisations for all data
+* JSON-LD and turtle serialisations for all data, full support for content negotiation
 * Supports various extensions to codemeta:
     * [Software Types and Services](https://github.com/proycon/codemetapy#software-types-and-services)
 
