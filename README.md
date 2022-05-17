@@ -61,7 +61,7 @@ Excerpt of a tool index in the default 'card' view:
 
 Excerpt of a tool index in the table view:
 
-![Index - table view](screenshot_index_cards.jpg)
+![Index - table view](screenshot_index_table.jpg)
 
 An example page for a specific tool:
 
