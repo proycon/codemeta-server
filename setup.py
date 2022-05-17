@@ -14,7 +14,7 @@ setup(
     python_requires='>=3.7.0',
     install_requires=open("requirements.txt", "r", encoding='utf-8').readlines(),
     classifiers=[
-        "License :: OSI Approved :: GNU General Public License v3",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
