@@ -24,7 +24,7 @@ Features:
 * Supports various extensions to codemeta:
     * [Software Types and Services](https://github.com/proycon/codemetapy#software-types-and-services)
 
-This software is developed in the scope of the CLARIAH-PLUS project, a
+This software is developed in the scope of the [CLARIAH-PLUS project](https://clariah.nl), a
 `Dockerfile`  for the CLARIAH Tool Discovery pipeline, including both the
 harvester and this server and API powering the CLARIAH Tool Store, can be found
 here: https://github.com/CLARIAH/tool-discovery .
