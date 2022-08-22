@@ -12,11 +12,12 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from codemeta import __path__ as CODEMETAPATH
 from codemeta.codemeta import serialize
+from codemeta.validation import get_validation_report
 from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETAPY
 from codemeta.parsers.jsonld import parse_jsonld
 import argparse
 
-VERSION = "0.1"
+VERSION = "0.2"
 
 STATIC_DIR = os.path.join(CODEMETAPATH[0], "resources")
 
@@ -149,6 +150,26 @@ class CodemetaServer(FastAPI):
                                   serialize(self.graph, None, self.get_args("turtle"), contextgraph=self.contextgraph )
                                )
 
+        @self.get("/validation/{resource:path}",
+                  name="Validation report",
+                  description="Returns a specific validation log",
+                  responses= {
+                      200: {
+                          "description": "Visualisation validation log",
+                          "content": {
+                              "text/plain": {},
+                          }
+                      },
+                  }
+                 )
+        async def get_validation(resource: str, request: Request):
+            res = URIRef(os.path.join(self.baseuri, "validation", resource))
+            if (res,None,None) in self.graph:
+                return self.respond( "text",
+                             get_validation_report(self.graph, res)
+                            )
+            else:
+                return self.respond404("text")
 
         @self.get("/{resource:path}",
                   name="Resource",
@@ -181,6 +202,7 @@ class CodemetaServer(FastAPI):
                             )
             else:
                 return self.respond404(output_type)
+
 
     def get_index(self, request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None, indextemplate: str  = "cardindex.html"):
         output_type = self.get_output_type(request)
@@ -217,6 +239,8 @@ class CodemetaServer(FastAPI):
             return Response( content=content, media_type="text/turtle")
         elif output_type == "html":
             return Response( content=content, media_type="text/html")
+        elif output_type == "text":
+            return Response( content=content, media_type="text/plain")
 
     def respond404(self, output_type: str) -> Response:
         if output_type == 'json':
@@ -225,6 +249,8 @@ class CodemetaServer(FastAPI):
             return Response(status_code=404, content="", media_type="text/turtle")
         elif output_type == "html":
             return Response(status_code=404, content="<html><body><strong>404</strong> - Not Found - Resource does not exist</body></html>", media_type="text/html")
+        elif output_type == "text":
+            return Response(status_code=404, content="404 Not Found - Resource does not exist", media_type="text/plain")
 
     def respond400(self, output_type: str, message: str) -> Response:
         if output_type == 'json':
@@ -233,6 +259,8 @@ class CodemetaServer(FastAPI):
             return Response(status_code=400, content="", media_type="text/turtle")
         elif output_type == "html":
             return Response(status_code=400, content=f"<html><body><strong>400</strong> - Bad Request - {message}</body></html>", media_type="text/html")
+        elif output_type == "text":
+            return Response(status_code=400, content=f"400 Bad Request - {message}", media_type="text/plain")
 
     def get_output_type(self, request: Request) -> str:
         """Get the outputtype based on content negotiation"""
