@@ -97,6 +97,22 @@ class CodemetaServer(FastAPI):
         async def index(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
             return self.get_index(request,res,q,sparql, "cardindex.html", )
 
+
+        @self.get("/services/",
+                  name="Services",
+                  description="Provides a visualised index focused on software services",
+                  responses= {
+                      200: {
+                          "description": "Service index",
+                          "content": {
+                              "text/html": {},
+                          }
+                      },
+                  }
+                )
+        async def services(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
+            return self.get_index(request,res,q,sparql, "serviceindex.html", )
+
         @self.get("/table/",
                   name="Index",
                   description="Provides a tabular index to the data or simply returns all the data, i.e. the entire knowledge graph, depending on the content negotiation.",
