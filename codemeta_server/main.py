@@ -399,6 +399,14 @@ def get_app(**kwargs):
         if 'CODEMETA_CSS' in environ:
             kwargs['css'] = environ['CODEMETA_CSS']
 
+    if not kwargs.get('addcontext'):
+        if 'CODEMETA_ADDCONTEXT' in environ:
+            kwargs['addcontext'] = environ['CODEMETA_ADDCONTEXT'].split(" ")
+
+    if not kwargs.get('includecontext'):
+        if 'CODEMETA_INCLUDECONTEXT' in environ:
+            kwargs['includecontext'] = environ['CODEMETA_INCLUDECONTEXT'].lower() in ("true","yes","1")
+
     return CodemetaServer(**kwargs)
 
 
