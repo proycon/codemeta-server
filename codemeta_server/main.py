@@ -58,6 +58,7 @@ class CodemetaServer(FastAPI):
         parse_jsonld(g, None, getstream(graph), self.get_args())
         self.graph = g
         self.contextgraph = contextgraph
+        self.graph += contextgraph #include context
         if 'inputlogdir' in kwargs:
             self.read_logs(kwargs['inputlogdir'])
         # Instantiate FastAPI
