@@ -38,7 +38,7 @@ here: https://github.com/CLARIAH/tool-discovery .
 
 In development scenarios, you can run `codemeta-server` as follows:
 `
-codemeta-server --graph data.json --baseuri https://tools.dev.clariah.nl/ --baseurl http://localhost:8080/ --port 8080
+codemeta-server --graph data.json --baseuri http://localhost:8080/ --baseurl http://localhost:8080/ --port 8080
 `
 Check ``codemeta-server --help`` for help on all the options.
 
@@ -46,7 +46,7 @@ The file `data.json` is produced by [codemetapy](https://github.com/proycon/code
 Say you have ``codemeta.json`` files for  two resources, then you can use codemetapy to create a graph as follows:
 
 ``
-codemetapy --graph resource1.codemeta.json resource2.codemeta.json > data.json
+codemetapy --baseuri http://localhost:8080/ --graph resource1.codemeta.json resource2.codemeta.json > data.json
 ``
 
 If you have no codemeta files at all yet, then you can use codemetapy (via
