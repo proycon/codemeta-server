@@ -52,7 +52,10 @@ class CodemetaServer(FastAPI):
             self.baseuri = self.baseurl
 
         self.title = kwargs.get('title')
-        self.css = [ x.strip() for x in kwargs.get('css',"").split(",") if x.strip() ]
+        if kwargs.get('css'):
+            self.css = [ x.strip() for x in kwargs.get('css',"").split(",") if x.strip() ]
+        else:
+            self.css = []
 
         print(f"Instantiating codemeta server: graph={graph}, baseuri={self.baseuri}, baseurl={self.baseurl}",file=sys.stderr)
 
@@ -64,7 +67,7 @@ class CodemetaServer(FastAPI):
         self.contextgraph = contextgraph
         if self.includecontext:
             self.graph += contextgraph #include context
-        if 'inputlogdir' in kwargs:
+        if kwargs.get('inputlogdir'):
             self.read_logs(kwargs['inputlogdir'])
         # Instantiate FastAPI
         super().__init__(
@@ -387,6 +390,9 @@ def get_app(**kwargs):
     if not kwargs.get('title'):
         if 'CODEMETA_TITLE' in environ:
             kwargs['title'] = environ['CODEMETA_TITLE']
+    if not kwargs.get('title'):
+        kwargs['title'] = "Codemeta server" #we must have a title
+
     if not kwargs.get('intro'):
         if 'CODEMETA_INTRO' in environ:
             kwargs['intro'] = environ['CODEMETA_INTRO']
