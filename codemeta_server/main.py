@@ -57,6 +57,8 @@ class CodemetaServer(FastAPI):
         else:
             self.css = []
 
+        self.intro = kwargs.get('intro',"")
+
         print(f"Instantiating codemeta server: graph={graph}, baseuri={self.baseuri}, baseurl={self.baseurl}",file=sys.stderr)
 
         self.includecontext = includecontext
@@ -255,6 +257,7 @@ class CodemetaServer(FastAPI):
             "no_cache": True,
             "includecontext": self.includecontext,
             "addcontext": self.addcontext,
+            "intro": self.intro,
             "css": [ os.path.join(self.baseurl,"static/codemeta.css") , os.path.join(self.baseurl,"static/fontawesome.css") ] + self.css
         })
 
