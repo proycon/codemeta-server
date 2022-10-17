@@ -63,7 +63,7 @@ class CodemetaServer(FastAPI):
 
         self.includecontext = includecontext
         self.addcontext = addcontext
-        g, contextgraph = init_graph(False, self.addcontext)
+        g, contextgraph = init_graph(self.get_args())
         parse_jsonld(g, None, getstream(graph), self.get_args())
         self.graph = g
         self.contextgraph = contextgraph
