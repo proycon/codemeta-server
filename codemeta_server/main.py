@@ -3,8 +3,11 @@ import os.path
 import json
 import traceback
 import glob
+import re
 from typing import Union, Optional
 from os import environ
+from collections import defaultdict
+from packaging.version import Version
 from rdflib_endpoint import SparqlEndpoint
 from rdflib import Graph, ConjunctiveGraph, URIRef, Literal
 from fastapi import FastAPI, Request, Response
@@ -13,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from codemeta import __path__ as CODEMETAPATH
 from codemeta.codemeta import serialize
 from codemeta.validation import get_validation_report
-from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETAPY
+from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETAPY, urijoin
 from codemeta.parsers.jsonld import parse_jsonld
 import argparse
 
@@ -31,6 +34,8 @@ PREFIX repostatus: <https://www.repostatus.org/#>
 PREFIX spdx: <http://spdx.org/licences/>
 PREFIX orcid: <http://orcid.org/>
 """
+
+    
 
 class CodemetaServer(FastAPI):
     def __init__(self, *args,
@@ -69,6 +74,7 @@ class CodemetaServer(FastAPI):
         self.contextgraph = contextgraph
         if self.includecontext:
             self.graph += contextgraph #include context
+        self.build_versionmap()
         if kwargs.get('inputlogdir'):
             self.read_logs(kwargs['inputlogdir'])
         # Instantiate FastAPI
@@ -189,8 +195,8 @@ class CodemetaServer(FastAPI):
                       },
                   }
                  )
-        async def get_validation(resource: str, request: Request):
-            res = URIRef(os.path.join(self.baseuri, "validation", resource))
+        async def get_validation(resource: str, version: str, request: Request):
+            res = URIRef(urijoin(self.baseuri, "validation", resource))
             if (res,None,None) in self.graph:
                 return self.respond( "text",
                              get_validation_report(self.graph, res)
@@ -222,13 +228,21 @@ class CodemetaServer(FastAPI):
                 output_type = "turtle"
             else:
                 output_type = self.get_output_type(request)
-            res = URIRef(os.path.join(self.baseuri, resource))
+            res = URIRef(urijoin(self.baseuri, resource))
             if (res,None,None) in self.graph:
                 return self.respond( output_type,
                              serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title )
                             )
             else:
-                return self.respond404(output_type)
+                #if the resource does not exist, a version qualifier may be missing, attempt to find the latest version
+                versions = self.versionmap.get(resource.strip("/"),[])
+                if versions:
+                    res = URIRef(urijoin(self.baseuri, resource,versions[0])) #first version is the latest one
+                    if (res,None,None) in self.graph:
+                        return self.respond( output_type,
+                                     serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title )
+                                    )
+            return self.respond404(output_type)
 
 
     def get_index(self, request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None, indextemplate: str  = "cardindex.html"):
@@ -258,7 +272,7 @@ class CodemetaServer(FastAPI):
             "includecontext": self.includecontext,
             "addcontext": self.addcontext,
             "intro": self.intro,
-            "css": [ os.path.join(self.baseurl,"static/codemeta.css") , os.path.join(self.baseurl,"static/fontawesome.css") ] + self.css
+            "css": [ urijoin(self.baseurl,"static/codemeta.css") , urijoin(self.baseurl,"static/fontawesome.css") ] + self.css
         })
 
     def respond(self, output_type: str, content: Union[str,bytes, None]) -> Response:
@@ -269,8 +283,7 @@ class CodemetaServer(FastAPI):
             return Response( content=content, media_type="text/turtle")
         elif output_type == "html":
             return Response( content=content, media_type="text/html")
-        elif output_type == "text":
-            return Response( content=content, media_type="text/plain")
+        return Response( content=content, media_type="text/plain")
 
     def respond404(self, output_type: str) -> Response:
         if output_type == 'json':
@@ -279,8 +292,7 @@ class CodemetaServer(FastAPI):
             return Response(status_code=404, content="", media_type="text/turtle")
         elif output_type == "html":
             return Response(status_code=404, content="<html><body><strong>404</strong> - Not Found - Resource does not exist</body></html>", media_type="text/html")
-        elif output_type == "text":
-            return Response(status_code=404, content="404 Not Found - Resource does not exist", media_type="text/plain")
+        return Response(status_code=404, content="404 Not Found - Resource does not exist", media_type="text/plain")
 
     def respond400(self, output_type: str, message: str) -> Response:
         if output_type == 'json':
@@ -289,8 +301,7 @@ class CodemetaServer(FastAPI):
             return Response(status_code=400, content="", media_type="text/turtle")
         elif output_type == "html":
             return Response(status_code=400, content=f"<html><body><strong>400</strong> - Bad Request - {message}</body></html>", media_type="text/html")
-        elif output_type == "text":
-            return Response(status_code=400, content=f"400 Bad Request - {message}", media_type="text/plain")
+        return Response(status_code=400, content=f"400 Bad Request - {message}", media_type="text/plain")
 
     def get_output_type(self, request: Request) -> str:
         """Get the outputtype based on content negotiation"""
@@ -377,7 +388,34 @@ class CodemetaServer(FastAPI):
             else:
                 print(f"Log {logfile} describes non-existing resource {res}",file=sys.stderr)
 
+    def build_versionmap(self):
+        self.versionmap = defaultdict(list)
+        for s,_,_ in self.graph.triples((None,RDF.type,SDO.SoftwareSourceCode)):
+            if str(s).startswith(self.baseuri):
+                components = str(s)[len(self.baseuri):].strip("/").split("/")
+                if len(components) == 2:
+                    name, version = components
+                    print(f"Versionmap: adding SofwareSourceCode {name} with version {version}",file=sys.stderr)
+                    self.versionmap[name].append(version)
+        targetproducts = set()
+        for _,_, o in self.graph.triples((None,SDO.targetProduct,None)):
+            if str(o).startswith(self.baseuri) and o not in targetproducts:
+                targetproducts.add(o) #prevents duplicates
+                components = str(o)[len(self.baseuri):].strip("/").split("/")
+                if len(components) == 3:
+                    interfacetype, name, version = components
+                    print(f"Versionmap: adding {interfacetype} {name} with version {version}",file=sys.stderr)
+                    self.versionmap[interfacetype + "/" + name].append(version)
+        
+        for key, versions in self.versionmap.items():
+            self.versionmap[key] = sorted(versions, key=lambda x: Version(re.sub("^v","", x))._key if validversion(x) else (9999,0,0,0,0,0), reverse=True)
 
+def validversion(s: str) -> bool:
+    try:
+        Version(s)
+        return True
+    except:
+        return False
 
 def get_app(**kwargs):
     if not kwargs.get('graph'):
