@@ -56,6 +56,9 @@ class CodemetaServer(FastAPI):
         else:
             self.baseuri = self.baseurl
 
+        if self.baseuri[-1] not in ('/','#','?'):
+            self.baseuri += "/"
+
         self.title = kwargs.get('title')
         if kwargs.get('css'):
             self.css = [ x.strip() for x in kwargs.get('css',"").split(",") if x.strip() ]
