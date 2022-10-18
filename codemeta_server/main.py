@@ -376,17 +376,21 @@ class CodemetaServer(FastAPI):
         for logfile in glob.glob(os.path.join(inputlogdir,"*.harvest.log")):
             identifier = os.path.basename(logfile).split(".")[0]
             res = URIRef(self.baseuri + identifier)
-            if (res,RDF.type,SDO.SoftwareSourceCode) in self.graph:
-                errors = 0
-                with open(logfile,'r',encoding='utf-8') as f:
-                    logdata = f.readlines()
-                    for line in logdata:
-                        if line.lower().find("harvester error") != -1:
-                            errors += 1
-                    self.graph.set((res, CODEMETAPY.errors, Literal(errors)))
-                    self.graph.set((res, CODEMETAPY.log, Literal("\n".join(logdata))))
-            else:
-                print(f"Log {logfile} describes non-existing resource {res}",file=sys.stderr)
+            if not (res,RDF.type,SDO.SoftwareSourceCode) in self.graph:
+                versions = self.versionmap.get(identifier,[])
+                if versions:
+                    res = URIRef(urijoin(self.baseuri, identifier,versions[0])) #first version is the latest one
+                    if not (res,RDF.type,SDO.SoftwareSourceCode) in self.graph:
+                        print(f"Log {logfile} describes non-existing resource {res}",file=sys.stderr)
+                        return
+            errors = 0
+            with open(logfile,'r',encoding='utf-8') as f:
+                logdata = f.readlines()
+                for line in logdata:
+                    if line.lower().find("harvester error") != -1:
+                        errors += 1
+                self.graph.set((res, CODEMETAPY.errors, Literal(errors)))
+                self.graph.set((res, CODEMETAPY.log, Literal("\n".join(logdata))))
 
     def build_versionmap(self):
         self.versionmap = defaultdict(list)
