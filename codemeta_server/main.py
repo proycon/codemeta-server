@@ -198,7 +198,7 @@ class CodemetaServer(FastAPI):
                       },
                   }
                  )
-        async def get_validation(resource: str, version: str, request: Request):
+        async def get_validation(resource: str, request: Request):
             res = URIRef(urijoin(self.baseuri, "validation", resource))
             if (res,None,None) in self.graph:
                 return self.respond( "text",
