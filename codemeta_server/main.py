@@ -20,7 +20,7 @@ from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMET
 from codemeta.parsers.jsonld import parse_jsonld
 import argparse
 
-VERSION = "0.3"
+VERSION = "0.3.0" #also adapt in setup.py
 
 STATIC_DIR = os.path.join(CODEMETAPATH[0], "resources")
 
