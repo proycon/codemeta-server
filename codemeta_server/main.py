@@ -30,8 +30,14 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX schema: <http://schema.org/>
 PREFIX codemeta: <https://codemeta.github.io/terms/>
 PREFIX stype: <https://w3id.org/software-types#>
+PREFIX iodata: <https://w3id.org/software-iodata#>
 PREFIX repostatus: <https://www.repostatus.org/#>
+PREFIX trl: <https://w3id.org/research-technology-readiness-levels#>
+PREFIX nwo: <https://w3id.org/nwo-research-fields#>
+PREFIX tadirah: <https://vocabs.dariah.eu/tadirah/>
 PREFIX spdx: <http://spdx.org/licences/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX orcid: <http://orcid.org/>
 """
 
