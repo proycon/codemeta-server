@@ -1,0 +1,147 @@
+{
+    "@context": [
+        "https://doi.org/10.5063/schema/codemeta-2.0",
+        "http://schema.org",
+        "https://w3id.org/software-types",
+        "https://w3id.org/software-iodata"
+    ],
+    "@id": "https://github.com/proycon/codemetapy.git",
+    "@type": "SoftwareSourceCode",
+    "applicationCategory": "Software Development",
+    "audience": [{
+        "@id": "/audience/developers",
+        "@type": "Audience",
+        "audienceType": "Developers"
+    },
+    {
+        "@id": "/audience/researchers",
+        "@type": "Audience",
+        "audienceType": "Researchers"
+    }
+    ],
+    "author": {
+        "@id": "https://orcid.org/0000-0002-1046-0006",
+        "@type": "Person",
+        "affiliation": {
+            "@id": "https://huc.knaw.nl"
+        },
+        "email": "proycon@anaproy.nl",
+        "familyName": "van Gompel",
+        "givenName": "Maarten",
+        "url": "https://proycon.anaproy.nl"
+    },
+    "codeRepository": "https://github.com/proycon/codemetapy.git",
+    "contributor": {
+        "@id": "https://orcid.org/0000-0002-1046-0006",
+        "@type": "Person",
+        "affiliation": {
+            "@id": "https://huc.knaw.nl"
+        },
+        "email": "proycon@anaproy.nl",
+        "familyName": "van Gompel",
+        "givenName": "Maarten",
+        "url": "https://proycon.anaproy.nl"
+    },
+    "dateCreated": "2022-03-22",
+    "dateModified": "2023-03-02",
+    "description": "Web API serving codemeta software metadata using codemeta and schema.org, provides a SPARQL endpoint and also offers a human web-interface ",
+    "developmentStatus": [ "https://www.repostatus.org/#active", "https://w3id.org/research-technology-readiness-levels#Level7ReleaseCandidate" ],
+	"funding": [
+        {
+            "@type": "Grant",
+            "name": "CLARIAH-PLUS (NWO grant 184.034.023)",
+            "funder": {
+                "@type": "Organization",
+                "name": "NWO", 
+                "url": "https://www.nwo.nl"
+            }
+        }
+	],
+    "identifier": "codemeta-server",
+    "issueTracker": "https://github.com/proycon/codemeta-server/issues",
+    "keywords": [
+        "metadata",
+        "scientific",
+        "codemeta",
+        "rdf",
+        "software metadata",
+        "schema.org",
+        "linked data"
+    ],
+    "license": "https://spdx.org/licenses/GPL-3.0-only",
+    "maintainer": {
+        "@id": "https://orcid.org/0000-0002-1046-0006",
+        "@type": "Person",
+        "affiliation": {
+            "@id": "https://huc.knaw.nl"
+        },
+        "email": "proycon@anaproy.nl",
+        "familyName": "van Gompel",
+        "givenName": "Maarten",
+        "url": "https://proycon.anaproy.nl"
+    },
+    "name": "codemeta-server",
+    "operatingSystem": [
+        "Linux",
+        "BSD",
+        "macOS"
+    ],
+    "producer": {
+        "@id": "https://huc.knaw.nl",
+        "@type": "Organization",
+        "name": "KNAW Humanities Cluster",
+        "url": "https://huc.knaw.nl",
+        "parentOrganization": {
+            "@id": "https://knaw.nl",
+            "@type": "Organization",
+            "name": "KNAW",
+            "url": "https://knaw.nl",
+            "location": {
+                "@type": "Place",
+                "name": "Amsterdam"
+            }
+        }
+    },
+    "readme": "https://github.com/proycon/codemeta-server/blob/master/README.md",
+    "runtimePlatform": [
+        "Python 3.6",
+        "Python 3.8",
+        "Python 3.9",
+        "Python 3",
+        "Python 3.7",
+        "Python 3.10",
+        "Python 3.11"
+    ],
+    "softwareRequirements": [
+        {
+            "@id": "/dependency/codemetapy",
+            "@type": "SoftwareApplication",
+            "identifier": "codemetapy",
+            "name": "codemetapy",
+            "runtimePlatform": "Python 3"
+        },
+        {
+            "@id": "/dependency/fastapi",
+            "@type": "SoftwareApplication",
+            "identifier": "fastapi",
+            "name": "fastapi",
+            "runtimePlatform": "Python 3"
+        },
+        {
+            "@id": "/dependency/rdflib-endpoint",
+            "@type": "SoftwareApplication",
+            "identifier": "rdflib-endpoint",
+            "name": "rdflib-endpoint",
+            "runtimePlatform": "Python 3"
+        }
+    ],
+    "targetProduct": [{
+        "@id": "/commandlineapplication/codemeta-server",
+        "@type": "ServerApplication",
+        "executableName": "codemeta-server",
+        "name": "codemeta-server",
+        "runtimePlatform": "Python 3"
+    }],
+    "url": "https://github.com/proycon/codemeta-server.git",
+    "version": "0.3.1"
+}
