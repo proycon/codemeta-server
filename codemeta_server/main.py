@@ -41,6 +41,7 @@ PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX orcid: <http://orcid.org/>
 """
 
+NSPREFIXES = ('rdfs:', 'schema:','codemeta:','stype:','iodata:','repostatus:','trl:','nwo:','tadirah:','spdx:','skos:','dct:','orcid:')
     
 
 class CodemetaServer(FastAPI):
@@ -356,7 +357,7 @@ class CodemetaServer(FastAPI):
                     exact = True
                 else:
                     exact = False
-                if not (value.startswith('rdf:') or value.startswith('rdfs:') or value.startswith('schema:') or value.startswith('codemeta:') or value.startswith('stype:') or value.isnumeric()):
+                if not (value.startswith(NSPREFIXES) or value.isnumeric()):
                     value = f"\"{value}\"" #string literal
                 i = len(conditions) + 1
                 if exact:
