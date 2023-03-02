@@ -135,6 +135,7 @@
             "runtimePlatform": "Python 3"
         }
     ],
+    "screenshot": [ "https://raw.githubusercontent.com/proycon/codemeta-server/master/screenshot_index_cards.jpg","https://raw.githubusercontent.com/proycon/codemeta-server/master/screenshot_index_table.jpg","https://raw.githubusercontent.com/proycon/codemeta-server/master/screenshot_page.jpg", "https://raw.githubusercontent.com/proycon/codemeta-server/master/screenshot_sparql.jpg"],
     "targetProduct": [{
         "@id": "/commandlineapplication/codemeta-server",
         "@type": "ServerApplication",
