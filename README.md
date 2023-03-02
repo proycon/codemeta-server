@@ -42,7 +42,7 @@ codemeta-server --graph data.json --baseuri http://localhost:8080/ --baseurl htt
 `
 Check ``codemeta-server --help`` for help on all the options.
 
-The file `data.json` is produced by [codemetapy](https://github.com/proycon/codemetapy_ (usually via codemeta-harvester) and contains the full linked data graph of all tools you want to show.
+The file `data.json` is produced by [codemetapy](https://github.com/proycon/codemetapy) (usually via codemeta-harvester) and contains the full linked data graph of all tools you want to show.
 Say you have ``codemeta.json`` files for  two resources, then you can use codemetapy to create a graph as follows:
 
 ``
