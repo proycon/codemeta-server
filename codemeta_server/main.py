@@ -264,7 +264,7 @@ class CodemetaServer(FastAPI):
             response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql, indextemplate=indextemplate, title=self.title, q=q if q else "")
         except Exception as e:
             msg = str(e)
-            if sparql: msg += "<pre>SPARQL query was: f{sparql}\n</pre>"
+            if sparql: msg += f"<pre>SPARQL query was: {sparql}\n</pre>"
             exc_type, exc_value, exc_traceback = sys.exc_info()
             msg += "<pre>" + "\n".join(traceback.format_exception(exc_type, exc_value, exc_traceback)) + "</pre>"
             print(msg,file=sys.stderr)
