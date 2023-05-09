@@ -4,7 +4,7 @@ import json
 import traceback
 import glob
 import re
-from typing import Union, Optional
+from typing import Union, Optional, List
 from os import environ
 from collections import defaultdict
 from packaging.version import Version
@@ -18,9 +18,10 @@ from codemeta.codemeta import serialize
 from codemeta.validation import get_validation_report
 from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETAPY, urijoin
 from codemeta.parsers.jsonld import parse_jsonld
+from codemeta2html.html import serialize_to_html
 import argparse
 
-VERSION = "0.3.1" #also adapt in setup.py and codemeta.json
+VERSION = "0.4.0" #also adapt in setup.py and codemeta.json
 
 STATIC_DIR = os.path.join(CODEMETAPATH[0], "resources")
 
@@ -156,7 +157,7 @@ class CodemetaServer(FastAPI):
                   }
                 )
         async def table(request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None):
-            return self.get_index(request,res,q,sparql, "index.html")
+            return self.get_index(request,res,q,sparql, "tableindex.html")
 
         @self.get("/data.json",
                   name="Full data download (JSON-LD)",
@@ -173,7 +174,7 @@ class CodemetaServer(FastAPI):
                 )
         async def data_json():
             return self.respond( "json",
-                                  serialize(self.graph, None, self.get_args("json"), contextgraph=self.contextgraph )
+                                 self.serialize(None, "json")
                                )
 
         @self.get("/data.ttl",
@@ -190,7 +191,7 @@ class CodemetaServer(FastAPI):
                 )
         async def data_turtle():
             return self.respond( "turtle",
-                                  serialize(self.graph, None, self.get_args("turtle"), contextgraph=self.contextgraph )
+                                 self.serialize(None, "turtle")
                                )
 
         @self.get("/validation/{resource:path}",
@@ -241,7 +242,7 @@ class CodemetaServer(FastAPI):
             res = URIRef(urijoin(self.baseuri, resource))
             if (res,None,None) in self.graph:
                 return self.respond( output_type,
-                             serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title )
+                             self.serialize(res, output_type)
                             )
             else:
                 #if the resource does not exist, a version qualifier may be missing, attempt to find the latest version
@@ -250,9 +251,16 @@ class CodemetaServer(FastAPI):
                     res = URIRef(urijoin(self.baseuri, resource,versions[0])) #first version is the latest one
                     if (res,None,None) in self.graph:
                         return self.respond( output_type,
-                                     serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title )
+                                     self.serialize(res, output_type)
                                     )
             return self.respond404(output_type)
+
+
+    def serialize(self, res: Union[Optional[URIRef],List[URIRef]], output_type: str, **kwargs) -> str:
+        if output_type == "html":
+             return serialize_to_html(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title, **kwargs )
+        else:
+             return serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, title=self.title, **kwargs )
 
 
     def get_index(self, request: Request, res: Optional[str] = None, q: Optional[str] = None, sparql: Optional[str] = None, indextemplate: str  = "cardindex.html"):
@@ -261,7 +269,7 @@ class CodemetaServer(FastAPI):
             sparql = self.formulate_query(q)
         if res: res = [ URIRef(self.baseuri + x) for x in res.split(";") ]
         try:
-            response = serialize(self.graph, res, self.get_args(output_type), contextgraph=self.contextgraph, sparql_query=sparql, indextemplate=indextemplate, title=self.title, q=q if q else "")
+            response = self.serialize(res, output_type, sparql_query=sparql, indextemplate=indextemplate, q=q if q else "")
         except Exception as e:
             msg = str(e)
             if sparql: msg += f"<pre>SPARQL query was: {sparql}\n</pre>"
@@ -277,7 +285,7 @@ class CodemetaServer(FastAPI):
             "baseurl": self.baseurl,
             "graph": True,
             "output": output_type,
-            "toolstore": True,
+            "buildsite": True,
             "no_cache": True,
             "includecontext": self.includecontext,
             "addcontext": self.addcontext,

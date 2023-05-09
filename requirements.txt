@@ -1,3 +1,4 @@
 rdflib-endpoint
-codemetapy >= 2.3.0
+codemetapy >= 2.5.0
+codemeta2html >= 0.1.0
 fastapi
