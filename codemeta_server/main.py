@@ -365,13 +365,23 @@ class CodemetaServer(FastAPI):
                     exact = True
                 else:
                     exact = False
-                if not (value.startswith(NSPREFIXES) or value.isnumeric()):
-                    value = f"\"{value}\"" #string literal
-                i = len(conditions) + 1
-                if exact:
-                    conditions.append(f"?res {key} {value} .")
+                if value.find('|') > 0:
+                    values = []
+                    for value in value.split('|'): #disjunction
+                        if not (value.startswith(NSPREFIXES) or value.isnumeric()):
+                            value = f"\"{value}\"" #string literal
+                        values.append(f"{value} .")
+                    if values:
+                        i = len(conditions) + 1
+                        conditions.append("{{ VALUES ?values{i} {{ " + ", ".join(values)  + f" }} ?res {key} ?values{i}.")
                 else:
-                    conditions.append(f"?res {key} ?v{i} FILTER regex(str(?v{i}), {value}, \"i\") .") #last i is for case-insensitive
+                    if not (value.startswith(NSPREFIXES) or value.isnumeric()):
+                        value = f"\"{value}\"" #string literal
+                    i = len(conditions) + 1
+                    if exact:
+                        conditions.append(f"?res {key} {value} .")
+                    else:
+                        conditions.append(f"?res {key} ?v{i} FILTER regex(str(?v{i}), {value}, \"i\") .") #last i is for case-insensitive
             else:
                 value = clause.strip()
                 i = len(conditions) + 1
