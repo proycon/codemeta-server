@@ -55,6 +55,7 @@ class CodemetaServer(FastAPI):
                  version: str = VERSION,
                  includecontext: bool = False,
                  addcontext: list = [],
+                 addcontextgraph: list = [],
                  **kwargs
                 ) -> None:
         """Constructor for the CodemetaServer"""
@@ -81,7 +82,8 @@ class CodemetaServer(FastAPI):
 
         self.includecontext = includecontext
         self.addcontext = addcontext
-        g, contextgraph = init_graph(self.get_args())
+        self.addcontextgraph = addcontextgraph
+        g, contextgraph = init_graph()
         parse_jsonld(g, None, getstream(graph), self.get_args())
         self.graph = g
         self.contextgraph = contextgraph
@@ -309,6 +311,7 @@ class CodemetaServer(FastAPI):
             "no_cache": True,
             "includecontext": self.includecontext,
             "addcontext": self.addcontext,
+            "addcontextgraph": self.addcontextgraph,
             "intro": self.intro,
             "css": [ "codemeta.css" , "fontawesome.css" ] + self.css
         })
@@ -504,6 +507,10 @@ def get_app(**kwargs):
     if not kwargs.get('addcontext'):
         if 'CODEMETA_ADDCONTEXT' in environ:
             kwargs['addcontext'] = environ['CODEMETA_ADDCONTEXT'].split(" ")
+
+    if not kwargs.get('addcontextgraph'):
+        if 'CODEMETA_ADDCONTEXTGRAPH' in environ:
+            kwargs['addcontextgraph'] = environ['CODEMETA_ADDCONTEXTGRAPH'].split(" ")
 
     if not kwargs.get('includecontext'):
         if 'CODEMETA_INCLUDECONTEXT' in environ:
