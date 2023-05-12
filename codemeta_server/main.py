@@ -250,12 +250,18 @@ class CodemetaServer(FastAPI):
                   }
                  )
         async def get_resource(resource: str, request: Request):
-            if resource.endswith(".json"):
+            if resource.endswith("data.json"):
+                resource = resource[:-(len("data.json") + 1)]
+                output_type = "json"
+            elif resource.endswith("data.ttl"):
+                resource = resource[:-(len("data.ttl") + 1)]
+                output_type = "ttl"
+            elif resource.endswith(".json"):
                 resource = resource[:-5]
                 output_type = "json"
             elif resource.endswith(".ttl"):
                 resource = resource[:-4]
-                output_type = "turtle"
+                output_type = "ttl"
             else:
                 output_type = self.get_output_type(request)
             res = URIRef(urijoin(self.baseuri, resource))
