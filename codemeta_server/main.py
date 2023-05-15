@@ -341,7 +341,7 @@ SELECT ?name ?description ?repo ?status ?license WHERE {
             "addcontext": self.addcontext,
             "addcontextgraph": self.addcontextgraph,
             "intro": self.intro,
-            "css": [ "codemeta.css" , "fontawesome.css" ] + self.css
+            "css": [ f"codemeta.css?v={VERSION}" , f"fontawesome.css?v={VERSION}" ] + self.css #cache busting
         })
 
     def respond(self, output_type: str, content: Union[str,bytes, None]) -> Response:
