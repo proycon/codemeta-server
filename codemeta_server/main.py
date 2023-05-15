@@ -102,9 +102,30 @@ class CodemetaServer(FastAPI):
             title="Codemeta Server SPARQL endpoint",
             description="A SPARQL endpoint to serve software metadata using codemeta and schema.org\n[Source code](https://github.com/proycon/codemeta-server/)",
             version=VERSION,
-            public_url=urijoin(self.baseurl,"api/sparql"),
-            path="/sparql",
+            public_url=urijoin(self.baseurl,"api/"),
+            path="/",
             cors_enabled=True,
+            example_query="""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX codemeta: <https://codemeta.github.io/terms/>
+PREFIX softwaretypes: <https://w3id.org/software-types#>
+PREFIX softwareiodata: <https://w3id.org/software-iodata#>
+PREFIX trl: <https://w3id.org/research-technology-readiness-levels#>
+PREFIX repostatus: <https://www.repostatus.org/#>
+PREFIX nwo: <https://w3id.org/nwo-research-fields#>
+PREFIX tadirah: <https://vocabs.dariah.eu/tadirah/>
+PREFIX spdx: <http://spdx.org/licenses/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+SELECT ?name ?description ?repo ?status ?license WHERE {
+    ?sub schema:name ?name .
+    ?sub rdf:type schema:SoftwareSourceCode .
+    ?sub schema:license ?license .
+    ?sub codemeta:developmentStatus ?status .
+    ?sub schema:codeRepository ?repo .
+} LIMIT 25
+"""
         )
         self.mount("/api", subapi)
 
