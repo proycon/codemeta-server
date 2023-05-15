@@ -43,7 +43,7 @@
         "url": "https://proycon.anaproy.nl"
     },
     "dateCreated": "2022-03-22",
-    "dateModified": "2023-05-09",
+    "dateModified": "2023-05-15",
     "description": "Web API serving codemeta software metadata using codemeta and schema.org, provides a SPARQL endpoint and also offers a human web-interface ",
     "developmentStatus": [ "https://www.repostatus.org/#active", "https://w3id.org/research-technology-readiness-levels#Level7ReleaseCandidate" ],
 	"funding": [
