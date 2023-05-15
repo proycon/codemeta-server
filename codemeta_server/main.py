@@ -44,7 +44,6 @@ PREFIX orcid: <http://orcid.org/>
 
 NSPREFIXES = ('rdfs:', 'schema:','codemeta:','stype:','iodata:','repostatus:','trl:','nwo:','tadirah:','spdx:','skos:','dct:','orcid:')
     
-
 class CodemetaServer(FastAPI):
     def __init__(self, *args,
                  graph: str,
@@ -104,6 +103,7 @@ class CodemetaServer(FastAPI):
             description="A SPARQL endpoint to serve software metadata using codemeta and schema.org\n[Source code](https://github.com/proycon/codemeta-server/)",
             version=VERSION,
             public_url=urijoin(self.baseurl,"api/sparql"),
+            path="/sparql",
             cors_enabled=True,
         )
         self.mount("/api", subapi)
@@ -314,7 +314,8 @@ class CodemetaServer(FastAPI):
             "graph": True,
             "output": output_type,
             "buildsite": True,
-            "no_cache": True,
+            "serverside": True,
+            "no_cache": False,
             "includecontext": self.includecontext,
             "addcontext": self.addcontext,
             "addcontextgraph": self.addcontextgraph,
