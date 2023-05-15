@@ -7,17 +7,30 @@ Codemeta server provides a simple portal to software tools, based on software
 metadata in [codemeta](https://codemeta.github.io) and
 [schema.org](https://schema.org). It is implemented as an in-memory RDF triple
 store and provides an API (including SPARQL endpoint) for querying. It builds
-upon the [codemetapy](http://github.com/proycon/codemetapy) library, which
-implements most of the functionality. Automatic harvesting of software metadata
-can be accomplished via [codemeta-harvester](https://github.com/proycon/codemeta-harvester).
+upon the [codemeta2html](http://github.com/proycon/codemeta2html) and
+[codemetapy](http://github.com/proycon/codemetapy) libraries, which implement
+most of the functionality. Automatic harvesting of software metadata can be
+accomplished via
+[codemeta-harvester](https://github.com/proycon/codemeta-harvester).
+
+**Note:** If you want a static site instead of a triple-store backed web application, then 
+you dont need codemeta-server and can just use [codemeta2html](http://github.com/proycon/codemeta2html).
 
 Features:
 
-* Web-user interface for end-users
-    * Index of tools ('card' view and table view)
-    * Per-tool pages
+* Web-user interface for end-users (i.e. everything from [codemeta2html](http://github.com/proycon/codemeta2html)):
+    * rich [RDFa](https://www.w3.org/TR/rdfa-primer/) data (codemeta/schema.org/etc) embedded in the HTML,
+      expressing as much of the input linked data as possible. This means though we visualise for humans, we do 
+      not sacrifice on machine parsability and semantic interpretability.
+    * index pages (card view & table view)
+    * one dedicated page per software source project
+    * client-side filtering (faceted search) capabilities
+    * direct access to the underlying JSON-LD and Turtle serialisations per source project and for the complete data graph as a whole
+    * responsive layout suitable for different devices and screen-sizes
     * Integrates some badges (aka shields) like for GitHub, Repostatus
-* Simple search/query facilities
+    * minimal amount of external web calls (only for github/gitlab badges and for external resources references directly by the software metadata itself)
+    * minimal client-side javascript, also usable without (except for filtering)
+* Simple server-side search/query facilities
 * Advanced query facilities using SPARQL:
     * SPARQL endpoint
     * [YASGUI](https://github.com/TriplyDB/YASGUI) front-end for end-users.
@@ -42,15 +55,15 @@ codemeta-server --graph data.json --baseuri http://localhost:8080/ --baseurl htt
 `
 Check ``codemeta-server --help`` for help on all the options.
 
-The file `data.json` is produced by [codemetapy](https://github.com/proycon/codemetapy) (usually via codemeta-harvester) and contains the full linked data graph of all tools you want to show.
+The file `data.json` is produced by [codemetapy](https://github.com/proycon/codemetapy) (possibly via [codemeta-harvester](https://github.com/proycon/codemeta-harvester) and contains the full linked data graph of all tools you want to show.
 Say you have ``codemeta.json`` files for  two resources, then you can use codemetapy to create a graph as follows:
 
 ``
 codemetapy --baseuri http://localhost:8080/ --graph resource1.codemeta.json resource2.codemeta.json > data.json
 ``
 
-If you have no codemeta files at all yet, then you can use codemetapy (via
-[codemeta-harvester](https://github.com/proycon/codemeta-harvester) to automatically extract metadata.
+If you have no codemeta files at all yet, then still you can use codemetapy (via
+[codemeta-harvester](https://github.com/proycon/codemeta-harvester) to automatically extract metadata from other known schemas.
 
 For production scenarios, you'll want to run codemeta-server via WSGI/ASGI, check the Dockerfile in https://github.com/CLARIAH/tool-discovery .
 
