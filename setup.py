@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    version='0.4.1', #also adapt in main.py and codemeta.json
+    version='0.5.0', #also adapt in main.py and codemeta.json
     name='codemeta-server',
     license='GPL-3.0-only',
     description='Web API serving codemeta software metadata using codemeta and schema.org, provides a SPARQL endpoint and also offers a human web-interface',

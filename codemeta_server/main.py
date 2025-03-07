@@ -15,13 +15,13 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from codemeta.codemeta import serialize
 from codemeta.validation import get_validation_report
-from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETAPY, urijoin
+from codemeta.common import getstream, init_graph, AttribDict, SDO, RDF, CODEMETA, CODEMETAPY, urijoin
 from codemeta.parsers.jsonld import parse_jsonld
 from codemeta2html import __path__ as CODEMETA2HTMLPATH
 from codemeta2html.html import serialize_to_html
 import argparse
 
-VERSION = "0.4.0" #also adapt in setup.py and codemeta.json
+VERSION = "0.5.0" #also adapt in setup.py and codemeta.json
 
 STATIC_DIR = os.path.join(CODEMETA2HTMLPATH[0], "style")
 
@@ -480,10 +480,10 @@ SELECT ?name ?description ?repo ?status ?license WHERE {
                     name, version = components
                     print(f"Versionmap: adding SofwareSourceCode {name} with version {version}",file=sys.stderr)
                     self.versionmap[name].append(version)
-        targetproducts = set()
-        for _,_, o in self.graph.triples((None,SDO.targetProduct,None)):
-            if str(o).startswith(self.baseuri) and o not in targetproducts:
-                targetproducts.add(o) #prevents duplicates
+        targetapps = set()
+        for _,_, o in self.graph.triples((None,CODEMETA.isSourceCodeOf,None)):
+            if str(o).startswith(self.baseuri) and o not in targetapps:
+                targetapps.add(o) #prevents duplicates
                 components = str(o)[len(self.baseuri):].strip("/").split("/")
                 if len(components) == 3:
                     interfacetype, name, version = components

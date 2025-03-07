@@ -1,5 +1,5 @@
 rdflib-endpoint >= 0.4.0
-codemetapy >= 2.5.0
-codemeta2html >= 0.1.0
+codemetapy >= 3.0.0
+codemeta2html >= 0.2.0
 fastapi
 uvicorn
