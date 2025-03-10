@@ -102,7 +102,7 @@ class CodemetaServer(FastAPI):
             title="Codemeta Server SPARQL endpoint",
             description="A SPARQL endpoint to serve software metadata using codemeta and schema.org\n[Source code](https://github.com/proycon/codemeta-server/)",
             version=VERSION,
-            public_url=urijoin(self.baseurl,"api/") + "/", #ugly patch: rdflib_endpoint strips a / for yasgui but we need it! so we add two
+            public_url=urijoin(self.baseurl,"api/"),
             path="/",
             cors_enabled=True,
             example_query="""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
