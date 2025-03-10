@@ -127,7 +127,7 @@ SELECT ?name ?description ?repo ?status ?license WHERE {
 } LIMIT 25
 """
         )
-        self.mount("/api", subapi)
+        self.mount("/api/", subapi)
 
         #Serve static files
         self.mount("/static", StaticFiles(directory=STATIC_DIR))
