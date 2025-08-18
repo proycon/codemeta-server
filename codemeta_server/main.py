@@ -22,7 +22,7 @@ from codemeta2html import __path__ as CODEMETA2HTMLPATH
 from codemeta2html.html import serialize_to_html
 import argparse
 
-VERSION = "0.5.0" #also adapt in setup.py and codemeta.json
+VERSION = "0.5.1" #also adapt in setup.py and codemeta.json
 
 STATIC_DIR = os.path.join(CODEMETA2HTMLPATH[0], "style")
 
