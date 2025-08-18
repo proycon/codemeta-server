@@ -4,6 +4,7 @@ import json
 import traceback
 import glob
 import re
+from html import escape
 from typing import Union, Optional, List
 from os import environ
 from collections import defaultdict
@@ -320,9 +321,9 @@ SELECT ?name ?description ?repo ?status ?license WHERE {
             response = self.serialize(res, output_type, sparql_query=sparql, indextemplate=indextemplate, q=q if q else "")
         except Exception as e:
             msg = str(e)
-            if sparql: msg += f"<pre>SPARQL query was: {sparql}\n</pre>"
+            if sparql: msg += f"<pre>SPARQL query was: {escape(sparql)}\n</pre>"
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            msg += "<pre>" + "\n".join(traceback.format_exception(exc_type, exc_value, exc_traceback)) + "</pre>"
+            msg += "<pre>" + escape("\n".join(traceback.format_exception(exc_type, exc_value, exc_traceback))) + "</pre>"
             print(msg,file=sys.stderr)
             return self.respond400( output_type, msg)
         return self.respond( output_type, response)
